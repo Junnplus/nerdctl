@@ -198,3 +198,14 @@ func TestRunEnv(t *testing.T) {
 		return nil
 	})
 }
+
+func TestRunStdin(t *testing.T) {
+	t.Parallel()
+	base := testutil.NewBase(t)
+
+	const testStr = "test-run-stdin"
+	opts := []func(*testutil.Cmd){
+		testutil.WithStdin(strings.NewReader(testStr)),
+	}
+	base.Cmd("run", "--rm", "-i", testutil.CommonImage, "cat").CmdOption(opts...).AssertOutExactly(testStr)
+}
