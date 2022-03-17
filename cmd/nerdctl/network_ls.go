@@ -52,8 +52,9 @@ type networkPrintable struct {
 	ID     string // empty for non-nerdctl networks
 	Name   string
 	Labels string
-	// TODO: "CreatedAt", "Driver", "IPv6", "Internal", "Scope"
-	file string `json:"-"`
+	// TODO: "CreatedAt", "IPv6", "Internal", "Scope"
+	Driver string
+	file   string `json:"-"`
 }
 
 func networkLsAction(cmd *cobra.Command, args []string) error {
@@ -71,7 +72,7 @@ func networkLsAction(cmd *cobra.Command, args []string) error {
 	case "", "table", "wide":
 		w = tabwriter.NewWriter(cmd.OutOrStdout(), 4, 8, 4, ' ', 0)
 		if !quiet {
-			fmt.Fprintln(w, "NETWORK ID\tNAME\tFILE")
+			fmt.Fprintln(w, "NETWORK ID\tNAME\tDRIVER\tFILE")
 		}
 	case "raw":
 		return errors.New("unsupported format: \"raw\"")
@@ -101,8 +102,9 @@ func networkLsAction(cmd *cobra.Command, args []string) error {
 	pp := make([]networkPrintable, len(e.Networks))
 	for i, n := range e.Networks {
 		p := networkPrintable{
-			Name: n.Name,
-			file: n.File,
+			Name:   n.Name,
+			Driver: n.NerdctlDriver,
+			file:   n.File,
 		}
 		if n.NerdctlID != nil {
 			p.ID = strconv.Itoa(*n.NerdctlID)
@@ -116,10 +118,12 @@ func networkLsAction(cmd *cobra.Command, args []string) error {
 	// append pseudo networks
 	pp = append(pp, []networkPrintable{
 		{
-			Name: "host",
+			Name:   "host",
+			Driver: "host",
 		},
 		{
-			Name: "none",
+			Name:   "none",
+			Driver: "null",
 		},
 	}...)
 
@@ -137,7 +141,7 @@ func networkLsAction(cmd *cobra.Command, args []string) error {
 				fmt.Fprintln(w, p.ID)
 			}
 		} else {
-			fmt.Fprintf(w, "%s\t%s\t%s\n", p.ID, p.Name, p.file)
+			fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", p.ID, p.Name, p.Driver, p.file)
 		}
 	}
 	if f, ok := w.(Flusher); ok {

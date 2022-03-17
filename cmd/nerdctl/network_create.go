@@ -135,7 +135,7 @@ func networkCreateAction(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
-		net, err := e.GenerateNetworkConfig(labels, id, name, cniPlugins)
+		net, err := e.GenerateNetworkConfig(driver, labels, id, name, cniPlugins)
 		if err != nil {
 			return err
 		}

@@ -143,8 +143,7 @@ func generateNetOpts(cmd *cobra.Command, dataStore, stateDir, ns, id string) ([]
 		}
 		netMap := e.NetworkMap()
 		for _, netstr := range netSlice {
-			_, ok := netMap[netstr]
-			if !ok {
+			if _, ok := netMap[netstr]; !ok {
 				return nil, nil, nil, fmt.Errorf("network %s not found", netstr)
 			}
 		}

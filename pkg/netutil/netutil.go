@@ -65,14 +65,18 @@ type networkConfig struct {
 	*libcni.NetworkConfigList
 	NerdctlID     *int
 	NerdctlLabels *map[string]string
+	NerdctlDriver string
 	File          string
 }
 
+// cniNetworkConfig describes CNI network configuration for nerdctl.
+// It will be marshaled to JSON on CNI config path.
 type cniNetworkConfig struct {
 	CNIVersion string            `json:"cniVersion"`
 	Name       string            `json:"name"`
 	ID         int               `json:"nerdctlID"`
 	Labels     map[string]string `json:"nerdctlLabels"`
+	Driver     string            `json:"nerdctlDriver"`
 	Plugins    []CNIPlugin       `json:"plugins"`
 }
 
@@ -80,7 +84,7 @@ type cniNetworkConfig struct {
 // GenerateNetworkConfig does not fill "File" field.
 //
 // TODO: enable CNI isolation plugin
-func (e *CNIEnv) GenerateNetworkConfig(labels []string, id int, name string, plugins []CNIPlugin) (*networkConfig, error) {
+func (e *CNIEnv) GenerateNetworkConfig(driver string, labels []string, id int, name string, plugins []CNIPlugin) (*networkConfig, error) {
 	if e == nil || id < 0 || name == "" || len(plugins) == 0 {
 		return nil, errdefs.ErrInvalidArgument
 	}
@@ -109,6 +113,7 @@ func (e *CNIEnv) GenerateNetworkConfig(labels []string, id int, name string, plu
 		CNIVersion: "0.4.0",
 		Name:       name,
 		ID:         id,
+		Driver:     driver,
 		Labels:     labelsMap,
 		Plugins:    plugins,
 	}
@@ -126,6 +131,7 @@ func (e *CNIEnv) GenerateNetworkConfig(labels []string, id int, name string, plu
 		NetworkConfigList: l,
 		NerdctlID:         &id,
 		NerdctlLabels:     &labelsMap,
+		NerdctlDriver:     driver,
 		File:              "",
 	}, nil
 }
@@ -145,7 +151,7 @@ func (e *CNIEnv) WriteNetworkConfig(net *networkConfig) error {
 func (e *CNIEnv) DefaultNetworkConfig() (*networkConfig, error) {
 	ipam, _ := GenerateIPAM("default", DefaultCIDR, "", "", nil)
 	plugins, _ := GenerateCNIPlugins(DefaultNetworkName, DefaultID, ipam, nil)
-	return e.GenerateNetworkConfig(nil, DefaultID, DefaultNetworkName, plugins)
+	return e.GenerateNetworkConfig("bridge", nil, DefaultID, DefaultNetworkName, plugins)
 }
 
 // networkConfigList loads config from dir if dir exists.
@@ -184,12 +190,15 @@ func (e *CNIEnv) networkConfigList() ([]*networkConfig, error) {
 				return nil, err
 			}
 		}
-		l = append(l, &networkConfig{
+		n := &networkConfig{
 			NetworkConfigList: lcl,
-			NerdctlID:         nerdctlID(lcl.Bytes),
-			NerdctlLabels:     nerdctlLabels(lcl.Bytes),
 			File:              fileName,
-		})
+		}
+		if err := json.Unmarshal(lcl.Bytes, n); err != nil {
+			// The network is managed outside nerdctl
+			continue
+		}
+		l = append(l, n)
 	}
 	return l, nil
 }
@@ -204,29 +213,6 @@ func (e *CNIEnv) AcquireNextID() (int, error) {
 	}
 	nextID := maxID + 1
 	return nextID, nil
-}
-
-func nerdctlID(b []byte) *int {
-	type nerdctlConfigList struct {
-		NerdctlID *int `json:"nerdctlID,omitempty"`
-	}
-	var ncl nerdctlConfigList
-	if err := json.Unmarshal(b, &ncl); err != nil {
-		// The network is managed outside nerdctl
-		return nil
-	}
-	return ncl.NerdctlID
-}
-
-func nerdctlLabels(b []byte) *map[string]string {
-	type nerdctlConfigList struct {
-		NerdctlLabels *map[string]string `json:"nerdctlLabels,omitempty"`
-	}
-	var ncl nerdctlConfigList
-	if err := json.Unmarshal(b, &ncl); err != nil {
-		return nil
-	}
-	return ncl.NerdctlLabels
 }
 
 func GetBridgeName(id int) string {
