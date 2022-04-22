@@ -26,13 +26,11 @@ import (
 	"github.com/containerd/console"
 	"github.com/containerd/containerd"
 	"github.com/containerd/containerd/cio"
+	"github.com/sirupsen/logrus"
 )
 
 // NewTask is from https://github.com/containerd/containerd/blob/v1.4.3/cmd/ctr/commands/tasks/tasks_unix.go#L70-L108
 func NewTask(ctx context.Context, client *containerd.Client, container containerd.Container, flagI, flagT, flagD bool, con console.Console, logURI string) (containerd.Task, error) {
-	stdinC := &StdinCloser{
-		Stdin: os.Stdin,
-	}
 	var ioCreator cio.Creator
 	if flagT {
 		if con == nil {
@@ -49,6 +47,16 @@ func NewTask(ctx context.Context, client *containerd.Client, container container
 	} else {
 		var in io.Reader
 		if flagI {
+			stdinC := &StdinCloser{
+				Stdin: os.Stdin,
+				Closer: func() {
+					if t, err := container.Task(ctx, nil); err != nil {
+						logrus.WithError(err).Debugf("failed to get task for StdinCloser")
+					} else {
+						t.CloseIO(ctx, containerd.WithStdinCloser)
+					}
+				},
+			}
 			in = stdinC
 		}
 		ioCreator = cio.NewCreator(cio.WithStreams(in, os.Stdout, os.Stderr))
@@ -56,9 +64,6 @@ func NewTask(ctx context.Context, client *containerd.Client, container container
 	t, err := container.NewTask(ctx, ioCreator)
 	if err != nil {
 		return nil, err
-	}
-	stdinC.Closer = func() {
-		t.CloseIO(ctx, containerd.WithStdinCloser)
 	}
 	return t, nil
 }
@@ -71,7 +76,7 @@ type StdinCloser struct {
 
 func (s *StdinCloser) Read(p []byte) (int, error) {
 	n, err := s.Stdin.Read(p)
-	if err == io.EOF {
+	if err != nil {
 		if s.Closer != nil {
 			s.Closer()
 		}
