@@ -23,11 +23,13 @@ import (
 
 	"github.com/containerd/containerd"
 	"github.com/containerd/nerdctl/pkg/testutil"
+	"go.uber.org/goleak"
 	"gotest.tools/v3/assert"
 )
 
 func TestMain(m *testing.M) {
 	testutil.M(m)
+	goleak.VerifyTestMain(m)
 }
 
 // TestUnknownCommand tests https://github.com/containerd/nerdctl/issues/487

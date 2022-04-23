@@ -45,6 +45,7 @@ require (
 	github.com/tidwall/gjson v1.14.1
 	github.com/vishvananda/netlink v1.2.0-beta
 	github.com/vishvananda/netns v0.0.0-20211101163701-50045581ed74
+	go.uber.org/goleak v1.1.12
 	golang.org/x/crypto v0.0.0-20220321153916-2c7772ba3064
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
