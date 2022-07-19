@@ -37,12 +37,6 @@ func newVolumePruneCommand() *cobra.Command {
 }
 
 func volumePruneAction(cmd *cobra.Command, _ []string) error {
-	client, ctx, cancel, err := newClient(cmd)
-	if err != nil {
-		return err
-	}
-	defer cancel()
-
 	force, err := cmd.Flags().GetBool("force")
 	if err != nil {
 		return err
@@ -60,19 +54,27 @@ func volumePruneAction(cmd *cobra.Command, _ []string) error {
 		}
 	}
 
+	client, ctx, cancel, err := newClient(cmd)
+	if err != nil {
+		return err
+	}
+	defer cancel()
+
+	containers, err := client.Containers(ctx)
+	if err != nil {
+		return err
+	}
+
+	usedVolumes, err := usedVolumes(ctx, containers)
+	if err != nil {
+		return err
+	}
+
 	volStore, err := getVolumeStore(cmd)
 	if err != nil {
 		return err
 	}
 	volumes, err := volStore.List()
-	if err != nil {
-		return err
-	}
-	containers, err := client.Containers(ctx)
-	if err != nil {
-		return err
-	}
-	usedVolumes, err := usedVolumes(ctx, containers)
 	if err != nil {
 		return err
 	}

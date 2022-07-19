@@ -39,12 +39,6 @@ func newContainerPruneCommand() *cobra.Command {
 }
 
 func containerPruneAction(cmd *cobra.Command, _ []string) error {
-	client, ctx, cancel, err := newClient(cmd)
-	if err != nil {
-		return err
-	}
-	defer cancel()
-
 	force, err := cmd.Flags().GetBool("force")
 	if err != nil {
 		return err
@@ -59,6 +53,12 @@ func containerPruneAction(cmd *cobra.Command, _ []string) error {
 			return nil
 		}
 	}
+
+	client, ctx, cancel, err := newClient(cmd)
+	if err != nil {
+		return err
+	}
+	defer cancel()
 
 	ns, err := cmd.Flags().GetString("namespace")
 	if err != nil {

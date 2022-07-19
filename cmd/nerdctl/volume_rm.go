@@ -50,22 +50,24 @@ func volumeRmAction(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	defer cancel()
+
 	containers, err := client.Containers(ctx)
 	if err != nil {
 		return err
 	}
-	volStore, err := getVolumeStore(cmd)
-	if err != nil {
-		return err
-	}
-	names := args
+
 	usedVolumes, err := usedVolumes(ctx, containers)
 	if err != nil {
 		return err
 	}
 
+	volStore, err := getVolumeStore(cmd)
+	if err != nil {
+		return err
+	}
+
 	var volumenames []string // nolint: prealloc
-	for _, name := range names {
+	for _, name := range args {
 		volume, err := volStore.Get(name)
 		if err != nil {
 			return err
