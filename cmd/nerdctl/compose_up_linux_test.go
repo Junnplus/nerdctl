@@ -35,6 +35,7 @@ import (
 )
 
 func TestComposeUp(t *testing.T) {
+	t.Parallel()
 	base := testutil.NewBase(t)
 	testComposeUp(t, base, fmt.Sprintf(`
 version: '3.1'
@@ -123,6 +124,7 @@ func testComposeUp(t *testing.T, base *testutil.Base, dockerComposeYAML string) 
 }
 
 func TestComposeUpBuild(t *testing.T) {
+	t.Parallel()
 	testutil.RequiresBuild(t)
 	base := testutil.NewBase(t)
 	defer base.Cmd("builder", "prune").Run()
@@ -198,6 +200,7 @@ networks:
 }
 
 func TestComposeUpMultiNet(t *testing.T) {
+	t.Parallel()
 	base := testutil.NewBase(t)
 
 	var dockerComposeYAML = fmt.Sprintf(`
@@ -247,6 +250,7 @@ networks:
 }
 
 func TestComposeUpOsEnvVar(t *testing.T) {
+	t.Parallel()
 	base := testutil.NewBase(t)
 	const containerName = "nginxAlpine"
 	var dockerComposeYAML = fmt.Sprintf(`
@@ -278,6 +282,7 @@ services:
 }
 
 func TestComposeUpDotEnvFile(t *testing.T) {
+	t.Parallel()
 	base := testutil.NewBase(t)
 
 	var dockerComposeYAML = `
@@ -299,6 +304,7 @@ services:
 }
 
 func TestComposeUpEnvFileNotFoundError(t *testing.T) {
+	t.Parallel()
 	base := testutil.NewBase(t)
 
 	var dockerComposeYAML = `
@@ -321,6 +327,7 @@ services:
 }
 
 func TestComposeUpWithScale(t *testing.T) {
+	t.Parallel()
 	base := testutil.NewBase(t)
 
 	var dockerComposeYAML = fmt.Sprintf(`
@@ -345,6 +352,7 @@ services:
 }
 
 func TestComposeIPAMConfig(t *testing.T) {
+	t.Parallel()
 	base := testutil.NewBase(t)
 
 	var dockerComposeYAML = fmt.Sprintf(`
@@ -414,6 +422,7 @@ services:
 }
 
 func TestComposeUpIdempotent(t *testing.T) {
+	t.Parallel()
 	base := testutil.NewBase(t)
 
 	var dockerComposeYAML = fmt.Sprintf(`
@@ -439,6 +448,7 @@ services:
 }
 
 func TestComposeUpWithExternalNetwork(t *testing.T) {
+	t.Parallel()
 	containerName1 := testutil.Identifier(t) + "-1"
 	containerName2 := testutil.Identifier(t) + "-2"
 	networkName := testutil.Identifier(t) + "-network"

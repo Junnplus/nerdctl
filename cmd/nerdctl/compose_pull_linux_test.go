@@ -24,6 +24,7 @@ import (
 )
 
 func TestComposePullWithService(t *testing.T) {
+	t.Parallel()
 	base := testutil.NewBase(t)
 	var dockerComposeYAML = fmt.Sprintf(`
 version: '3.1'

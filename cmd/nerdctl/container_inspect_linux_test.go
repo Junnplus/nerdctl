@@ -27,6 +27,7 @@ import (
 )
 
 func TestContainerInspectContainsPortConfig(t *testing.T) {
+	t.Parallel()
 	testContainer := testutil.Identifier(t)
 
 	base := testutil.NewBase(t)
@@ -43,6 +44,7 @@ func TestContainerInspectContainsPortConfig(t *testing.T) {
 }
 
 func TestContainerInspectContainsMounts(t *testing.T) {
+	t.Parallel()
 	testContainer := testutil.Identifier(t)
 
 	base := testutil.NewBase(t)

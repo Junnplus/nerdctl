@@ -28,6 +28,7 @@ import (
 )
 
 func TestComposeConfig(t *testing.T) {
+	t.Parallel()
 	base := testutil.NewBase(t)
 
 	var dockerComposeYAML = `
@@ -43,6 +44,7 @@ services:
 }
 
 func TestComposeConfigWithPrintService(t *testing.T) {
+	t.Parallel()
 	base := testutil.NewBase(t)
 
 	var dockerComposeYAML = `
@@ -58,6 +60,7 @@ services:
 }
 
 func TestComposeConfigWithPrintServiceHash(t *testing.T) {
+	t.Parallel()
 	base := testutil.NewBase(t)
 
 	var dockerComposeYAML = `
@@ -80,6 +83,7 @@ services:
 }
 
 func TestComposeConfigWithMultipleFile(t *testing.T) {
+	t.Parallel()
 	base := testutil.NewBase(t)
 
 	var dockerComposeYAML = `
@@ -108,6 +112,7 @@ services:
 }
 
 func TestComposeConfigWithComposeFileEnv(t *testing.T) {
+	t.Parallel()
 	base := testutil.NewBase(t)
 
 	var dockerComposeYAML = `
