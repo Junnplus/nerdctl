@@ -39,7 +39,6 @@ import (
 
 const (
 	DefaultNetworkName = "bridge"
-	DefaultCIDR        = "10.4.0.0/24"
 	DefaultIPAMDriver  = "host-local"
 )
 
@@ -103,7 +102,7 @@ func (e *CNIEnv) generateCNIPlugins(driver string, name string, ipam map[string]
 		}
 		var bridge *bridgeConfig
 		if name == DefaultNetworkName {
-			bridge = newBridgePlugin("nerdctl0")
+			bridge = newBridgePlugin(DefaultBridgeInterface)
 		} else {
 			bridge = newBridgePlugin("br-" + networkID(name)[:12])
 		}

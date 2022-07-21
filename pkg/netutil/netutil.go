@@ -36,6 +36,11 @@ import (
 	"github.com/containernetworking/cni/libcni"
 )
 
+const (
+	DefaultBridgeInterface = "nerdctl0"
+	DefaultCIDR            = "10.4.0.0/24"
+)
+
 type CNIEnv struct {
 	Path        string
 	NetconfPath string
@@ -155,6 +160,10 @@ func (e *CNIEnv) ensureDefaultNetworkConfig() error {
 	filename := filepath.Join(e.NetconfPath, "nerdctl-"+DefaultNetworkName+".conflist")
 	if _, err := os.Stat(filename); err == nil {
 		return nil
+	}
+	// avoid subnet conflicts
+	if err := removeBridgeNetworkInterface(DefaultBridgeInterface); err != nil {
+		return err
 	}
 	opts := CreateOptions{
 		Name:       DefaultNetworkName,

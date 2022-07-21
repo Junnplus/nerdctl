@@ -26,7 +26,6 @@ import (
 
 const (
 	DefaultNetworkName = "nat"
-	DefaultCIDR        = "10.4.0.0/24"
 )
 
 func (n *networkConfig) subnets() []*net.IPNet {
